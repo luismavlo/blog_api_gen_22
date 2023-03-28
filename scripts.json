@@ -41,7 +41,7 @@
     "create a node router file": {
       "prefix": "router",
       "body": [
-        "const ${1:controllerFile} = require('../controllers/${1:controllerFile}');",
+        "const ${1:controllerFile} = require('../controllers/${2:controllerFile}');",
         "const express = require('express');",
         "",
         "const router = express.Router();",
