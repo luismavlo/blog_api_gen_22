@@ -27,3 +27,13 @@ exports.createUserValidation = [
     .withMessage('Password must be at least 8 characters long'),
   validFields,
 ];
+
+exports.updateUserValidation = [
+  body('name').notEmpty().withMessage('Name cannot be empty'),
+  body('email')
+    .notEmpty()
+    .withMessage('Email cannot be empty')
+    .isEmail()
+    .withMessage('Must be a valid email'),
+  validFields,
+];
