@@ -1,83 +1,48 @@
 const User = require('../models/user.model');
+const catchAsync = require('../utils/catchAsync');
 
-exports.findAll = async (req, res) => {
-  try {
-    const users = await User.findAll({
-      where: {
-        status: 'active',
-      },
-    });
+exports.findAll = catchAsync(async (req, res) => {
+  const users = await User.findAll({
+    where: {
+      status: 'active',
+    },
+  });
 
-    res.status(200).json({
-      status: 'success',
-      results: users.length,
-      users,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      status: 'fail',
-      message: 'Something went very wrong',
-      error,
-    });
-  }
-};
+  res.status(200).json({
+    status: 'success',
+    results: users.length,
+    users,
+  });
+});
 
-exports.findOne = async (req, res) => {
-  try {
-    const { user } = req;
+exports.findOne = catchAsync(async (req, res) => {
+  const { user } = req;
 
-    return res.status(200).json({
-      status: 'success',
-      user,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      status: 'fail',
-      message: 'Something went very wrong',
-      error,
-    });
-  }
-};
+  return res.status(200).json({
+    status: 'success',
+    user,
+  });
+});
 
-exports.update = async (req, res) => {
-  try {
-    const { name, email } = req.body;
-    const { user } = req;
+exports.update = catchAsync(async (req, res) => {
+  const { name, email } = req.body;
+  const { user } = req;
 
-    await user.update({ name, email });
+  await user.update({ name, email });
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'the user has been updated',
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      status: 'fail',
-      message: 'Something went very wrong',
-      error,
-    });
-  }
-};
+  return res.status(200).json({
+    status: 'success',
+    message: 'the user has been updated',
+  });
+});
 
-exports.delete = async (req, res) => {
-  try {
-    const { user } = req;
+exports.delete = catchAsync(async (req, res) => {
+  const { user } = req;
 
-    await user.update({ status: 'disabled' });
+  await user.update({ status: 'disabled' });
 
-    return res.status(200).json({
-      status: 'success',
-      message: 'the user has been deleted',
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      status: 'fail',
-      message: 'Something went very wrong',
-      error,
-    });
-  }
-};
+  return res.status(200).json({
+    status: 'success',
+    message: 'the user has been deleted',
+  });
+});
