@@ -2,12 +2,16 @@ const express = require('express');
 
 //controllers
 const userController = require('./../controllers/user.controller');
+const authController = require('./../controllers/auth.controller');
 
 //middlewares
 const userMiddleware = require('./../middlewares/user.middleware');
 const validationMiddleware = require('./../middlewares/validations.middleware');
+const authMiddleware = require('./../middlewares/auth.middleware');
 
 const router = express.Router();
+
+router.use(authMiddleware.protect);
 
 router.get('/', userController.findAll);
 
@@ -20,5 +24,12 @@ router
     userController.update
   )
   .delete(userMiddleware.validIfExistUser, userController.delete);
+
+router.patch(
+  '/password/:id',
+  validationMiddleware.updatedPasswordValidation,
+  userMiddleware.validIfExistUser,
+  authController.updatedPassword
+);
 
 module.exports = router;

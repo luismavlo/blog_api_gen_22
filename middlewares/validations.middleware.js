@@ -51,3 +51,17 @@ exports.loginUserValidation = [
     .withMessage('Password must be at least 8 characters long'),
   validFields,
 ];
+
+exports.updatedPasswordValidation = [
+  body('currentPassword')
+    .notEmpty()
+    .withMessage('The password cannot be empty')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long'),
+  body('newPassword')
+    .notEmpty()
+    .withMessage('The password cannot be empty')
+    .isLength({ min: 8 })
+    .withMessage('Password must be at least 8 characters long'),
+  validFields,
+];
