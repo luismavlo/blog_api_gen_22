@@ -21,14 +21,21 @@ router
   .patch(
     userMiddleware.validIfExistUser,
     validationMiddleware.updateUserValidation,
+    authMiddleware.protectAccountOwner,
     userController.update
   )
-  .delete(userMiddleware.validIfExistUser, userController.delete);
+  .delete(
+    userMiddleware.validIfExistUser,
+    // authMiddleware.protectAccountOwner,
+    authMiddleware.restrictTo('admin'),
+    userController.delete
+  );
 
 router.patch(
   '/password/:id',
   validationMiddleware.updatedPasswordValidation,
   userMiddleware.validIfExistUser,
+  authMiddleware.protectAccountOwner,
   authController.updatedPassword
 );
 
