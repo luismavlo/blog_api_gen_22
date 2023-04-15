@@ -5,6 +5,7 @@ const postController = require('../controllers/post.controller');
 
 //middlewares
 const authMiddleware = require('../middlewares/auth.middleware');
+const validationsMiddleware = require('../middlewares/validations.middleware');
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.use(authMiddleware.protect);
 router
   .route('/')
   .get(postController.findAllPost)
-  .post(postController.createPost);
+  .post(validationsMiddleware.createPostValidation, postController.createPost);
 
 router.get('/me', postController.findMyPosts);
 

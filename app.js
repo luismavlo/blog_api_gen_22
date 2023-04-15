@@ -10,6 +10,7 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/error.controller');
 
 const authRouter = require('./routes/auth.routes');
+const postRouter = require('./routes/post.routes');
 const userRouter = require('./routes/user.routes');
 
 const app = express();
@@ -34,6 +35,7 @@ app.use('/api/v1', limiter);
 //rutas
 app.use('/api/v1/auth', authRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/posts', postRouter);
 
 app.all('*', (req, res, next) => {
   return next(
