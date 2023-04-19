@@ -71,3 +71,8 @@ exports.createPostValidation = [
   body('content').notEmpty().withMessage('The content is required'),
   validFields,
 ];
+
+exports.validContentComment = [
+  body('text').notEmpty().withMessage('The text is required'),
+  validFields,
+];
