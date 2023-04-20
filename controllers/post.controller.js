@@ -1,8 +1,9 @@
+const Comment = require('./../models/comment.model');
 const Post = require('./../models/post.model');
-const { db } = require('./../database/config');
-
-const catchAsync = require('../utils/catchAsync');
 const User = require('../models/user.model');
+
+const { db } = require('./../database/config');
+const catchAsync = require('../utils/catchAsync');
 
 exports.findAllPost = catchAsync(async (req, res, next) => {
   const posts = await Post.findAll({
@@ -17,9 +18,19 @@ exports.findAllPost = catchAsync(async (req, res, next) => {
         model: User,
         attributes: ['id', 'name', 'profileImgUrl'],
       },
+      {
+        model: Comment,
+        attributes: ['text', 'createdAt'],
+        include: [
+          {
+            model: User,
+            attributes: ['name', 'profileImgUrl'],
+          },
+        ],
+      },
     ],
     order: [['createdAt', 'DESC']], //ASC = ascendente; DESC = descendente
-    limit: 5,
+    limit: 10,
   });
 
   return res.status(200).json({

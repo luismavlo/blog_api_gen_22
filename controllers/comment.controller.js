@@ -59,6 +59,13 @@ exports.findCommentById = catchAsync(async (req, res, next) => {
   });
 });
 
+/* This code exports a function named `updateComment` that updates an existing comment in the database
+using the `Comment` model. The function retrieves the `text` from the request body and the `comment`
+object from the request object, which is populated by the middleware function `getCommentById`. The
+function then updates the `text` property of the `comment` object with the retrieved `text` and
+sends a JSON response with a success status code of 200 and the updated comment. The function is
+wrapped in the `catchAsync` function to handle any errors that may occur during the asynchronous
+operation. */
 exports.updateComment = catchAsync(async (req, res, next) => {
   const { text } = req.body;
   const { comment } = req;
@@ -72,6 +79,12 @@ exports.updateComment = catchAsync(async (req, res, next) => {
   });
 });
 
+/* This code exports a function named `deleteComment` that updates the status of an existing comment in
+the database to "disabled" using the `Comment` model. The function retrieves the `comment` object
+from the request object, which is populated by the middleware function `getCommentById`. The
+function then updates the `status` property of the `comment` object to "disabled" and sends a JSON
+response with a success status code of 200 and the updated comment. The function is wrapped in the
+`catchAsync` function to handle any errors that may occur during the asynchronous operation. */
 exports.deleteComment = catchAsync(async (req, res, next) => {
   const { comment } = req;
 
