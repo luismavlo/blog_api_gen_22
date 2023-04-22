@@ -34,14 +34,18 @@ router.get(
 );
 
 router
-  .use('/:id', postMiddleware.validIfExistPost)
   .route('/:id')
-  .get(postController.findOnePost)
+  .get(postMiddleware.existsPostForFoundIt, postController.findOnePost)
   .patch(
     validationsMiddleware.createPostValidation,
+    postMiddleware.validIfExistPost,
     authMiddleware.protectAccountOwner,
     postController.updatePost
   )
-  .delete(authMiddleware.protectAccountOwner, postController.deletePost);
+  .delete(
+    postMiddleware.validIfExistPost,
+    authMiddleware.protectAccountOwner,
+    postController.deletePost
+  );
 
 module.exports = router;

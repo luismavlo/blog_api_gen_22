@@ -4,10 +4,13 @@ const PostImg = require('../models/postImg.model');
 const User = require('../models/user.model');
 
 const { db } = require('./../database/config');
-const catchAsync = require('../utils/catchAsync');
+const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 const { storage } = require('../utils/firebase');
-const { ref, uploadBytes } = require('firebase/storage');
+const catchAsync = require('../utils/catchAsync');
 
+/* This code exports a function called `findAllPost` that is used to retrieve all active posts from the
+database. It uses the `catchAsync` middleware to handle any errors that may occur during the
+execution of the function. */
 exports.findAllPost = catchAsync(async (req, res, next) => {
   const posts = await Post.findAll({
     where: {
@@ -20,29 +23,51 @@ exports.findAllPost = catchAsync(async (req, res, next) => {
       {
         model: User,
         attributes: ['id', 'name', 'profileImgUrl'],
+        //punto a
       },
       {
-        model: Comment,
-        attributes: ['text', 'createdAt'],
-        include: [
-          {
-            model: User,
-            attributes: ['name', 'profileImgUrl'],
-          },
-        ],
+        model: PostImg,
       },
     ],
     order: [['createdAt', 'DESC']], //ASC = ascendente; DESC = descendente
-    limit: 10,
+    limit: 20,
   });
+
+  const postsPromises = posts.map(async (post) => {
+    const postImgsPromises = post.postImgs.map(async (postImg) => {
+      const imgRef = ref(storage, postImg.postImgUrl);
+      const url = await getDownloadURL(imgRef);
+
+      postImg.postImgUrl = url;
+      return postImg;
+    });
+
+    const imgRefUser = ref(storage, post.user.profileImgUrl);
+    const urlProfile = await getDownloadURL(imgRefUser);
+
+    post.user.profileImgUrl = urlProfile;
+
+    const postImgsResolved = await Promise.all(postImgsPromises);
+    post.postImg = postImgsResolved;
+
+    return posts;
+  });
+
+  const postResolved = await Promise.all(postsPromises);
 
   return res.status(200).json({
     status: 'success',
     results: posts.length,
-    posts,
+    posts: postResolved,
   });
 });
 
+/* `exports.createPost` is a function that creates a new post in the database. It uses the `catchAsync`
+middleware to handle any errors that may occur during the execution of the function. It extracts the
+`title`, `content`, and `sessionUser` from the `req` object, and creates a new `Post` object with
+these values. It then creates a new `PostImg` object for each file in the `req.files` array, and
+associates it with the new `Post` object. Finally, it sends a JSON response with a success status
+and a message indicating that the post has been created. */
 exports.createPost = catchAsync(async (req, res, next) => {
   const { title, content } = req.body;
   const { sessionUser } = req;
@@ -105,6 +130,9 @@ exports.findUserPost = catchAsync(async (req, res, next) => {
         model: User,
         attributes: { exclude: ['password', 'passwordChangedAt'] },
       },
+      {
+        model: PostImg,
+      },
     ],
   });
 
@@ -115,8 +143,37 @@ exports.findUserPost = catchAsync(async (req, res, next) => {
   });
 });
 
+/* `exports.findOnePost` is a function that retrieves a single post from the database and its
+associated data, such as the user who created the post, the images associated with the post, and the
+comments made on the post. It uses the `catchAsync` middleware to handle any errors that may occur
+during the execution of the function. */
 exports.findOnePost = catchAsync(async (req, res, next) => {
   const { post } = req;
+
+  const imgRefUserProfile = ref(storage, post.user.profileImgUrl);
+  const urlProfileUser = await getDownloadURL(imgRefUserProfile);
+
+  post.user.profileImgUrl = urlProfileUser;
+
+  const postImgsPromises = post.postImgs.map(async (postImg) => {
+    const imgRef = ref(storage, postImg.postImgUrl);
+    const url = await getDownloadURL(imgRef);
+
+    postImg.postImgUrl = url;
+    return postImg;
+  });
+
+  const userImgsCommentPromises = post.comments.map(async (comment) => {
+    const imgRef = ref(storage, comment.user.profileImgUrl);
+    const url = await getDownloadURL(imgRef);
+
+    comment.user.profileImgUrl = url;
+    return comment;
+  });
+
+  const arrPromises = [...postImgsPromises, ...userImgsCommentPromises];
+
+  await Promise.all(arrPromises);
 
   res.status(200).json({
     status: 'success',
