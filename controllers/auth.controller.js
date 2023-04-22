@@ -3,37 +3,40 @@ const catchAsync = require('../utils/catchAsync');
 const bcrypt = require('bcryptjs');
 const generateJWT = require('../utils/jwt');
 const AppError = require('./../utils/appError');
+const { ref, uploadBytes } = require('firebase/storage');
+const { storage } = require('./../utils/firebase');
 
 exports.signup = catchAsync(async (req, res, next) => {
-  console.table(req.body);
-  console.log(req.file);
+  const { name, email, password, role } = req.body;
 
-  return res.json({
-    ok: true,
+  const imgRef = ref(storage, `users/${Date.now()}-${req.file.originalname}`);
+  const imgUploaded = await uploadBytes(imgRef, req.file.buffer);
+
+  const salt = await bcrypt.genSalt(12);
+  const encryptedPassword = await bcrypt.hash(password, salt);
+
+  const user = await User.create({
+    name: name.toLowerCase(),
+    email: email.toLowerCase(),
+    password: encryptedPassword,
+    role,
+    profileImgUrl: imgUploaded.metadata.fullPath,
   });
 
-  // const { name, email, password, role } = req.body;
-  // const salt = await bcrypt.genSalt(12);
-  // const encryptedPassword = await bcrypt.hash(password, salt);
-  // const user = await User.create({
-  //   name: name.toLowerCase(),
-  //   email: email.toLowerCase(),
-  //   password: encryptedPassword,
-  //   role,
-  // });
-  // const token = await generateJWT(user.id);
-  // res.status(201).json({
-  //   status: 'success',
-  //   message: 'The user has been created succesfully!',
-  //   token,
-  //   user: {
-  //     id: user.id,
-  //     name: user.name,
-  //     email: user.email,
-  //     profileImgUrl: user.profileImgUrl,
-  //     role: user.role,
-  //   },
-  // });
+  const token = await generateJWT(user.id);
+
+  res.status(201).json({
+    status: 'success',
+    message: 'The user has been created succesfully!',
+    token,
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      profileImgUrl: user.profileImgUrl,
+      role: user.role,
+    },
+  });
 });
 
 exports.login = catchAsync(async (req, res, next) => {

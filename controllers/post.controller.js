@@ -1,9 +1,12 @@
 const Comment = require('./../models/comment.model');
 const Post = require('./../models/post.model');
+const PostImg = require('../models/postImg.model');
 const User = require('../models/user.model');
 
 const { db } = require('./../database/config');
 const catchAsync = require('../utils/catchAsync');
+const { storage } = require('../utils/firebase');
+const { ref, uploadBytes } = require('firebase/storage');
 
 exports.findAllPost = catchAsync(async (req, res, next) => {
   const posts = await Post.findAll({
@@ -49,6 +52,19 @@ exports.createPost = catchAsync(async (req, res, next) => {
     content,
     userId: sessionUser.id,
   });
+
+  const postImgsPromises = req.files.map(async (file) => {
+    const imgRef = ref(storage, `posts/${Date.now()}-${file.originalname}`);
+
+    const imgUploaded = await uploadBytes(imgRef, file.buffer);
+
+    return await PostImg.create({
+      postId: post.id,
+      postImgUrl: imgUploaded.metadata.fullPath,
+    });
+  });
+
+  await Promise.all(postImgsPromises);
 
   res.status(201).json({
     status: 'success',
