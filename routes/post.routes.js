@@ -14,16 +14,17 @@ const { upload } = require('./../utils/multer');
 
 const router = express.Router();
 
-router.use(authMiddleware.protect);
-
 router
   .route('/')
   .get(postController.findAllPost)
   .post(
+    authMiddleware.protect,
     upload.array('postImgs', 3),
     validationsMiddleware.createPostValidation,
     postController.createPost
   );
+
+router.use(authMiddleware.protect);
 
 router.get('/me', postController.findMyPosts);
 

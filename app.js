@@ -16,7 +16,7 @@ const userRouter = require('./routes/user.routes');
 
 const app = express();
 const limiter = rateLimit({
-  max: 100,
+  max: 100000,
   windowMs: 60 * 60 * 1000,
   message: 'Too many request from this IP, please try again in one hour!',
 });

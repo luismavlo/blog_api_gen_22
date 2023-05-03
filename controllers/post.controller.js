@@ -22,8 +22,7 @@ exports.findAllPost = catchAsync(async (req, res, next) => {
     include: [
       {
         model: User,
-        attributes: ['id', 'name', 'profileImgUrl'],
-        //punto a
+        attributes: ['id', 'name', 'profileImgUrl', 'description'],
       },
       {
         model: PostImg,
@@ -50,7 +49,7 @@ exports.findAllPost = catchAsync(async (req, res, next) => {
     const postImgsResolved = await Promise.all(postImgsPromises);
     post.postImg = postImgsResolved;
 
-    return posts;
+    return post;
   });
 
   const postResolved = await Promise.all(postsPromises);

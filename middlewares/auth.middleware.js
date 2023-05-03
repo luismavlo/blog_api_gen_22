@@ -9,6 +9,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   //1. extraer el token
   let token;
 
+  console.log(token);
+
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')

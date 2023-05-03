@@ -1,6 +1,6 @@
 const User = require('../models/user.model');
 
-const { ref, uploadBytes } = require('firebase/storage');
+const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
 const { storage } = require('./../utils/firebase');
 const AppError = require('./../utils/appError');
 const bcrypt = require('bcryptjs');
@@ -34,6 +34,7 @@ exports.signup = catchAsync(async (req, res, next) => {
       id: user.id,
       name: user.name,
       email: user.email,
+      description: user.description,
       profileImgUrl: user.profileImgUrl,
       role: user.role,
     },
@@ -65,6 +66,9 @@ exports.login = catchAsync(async (req, res, next) => {
   //4. generar el jsonwebtoken
   const token = await generateJWT(user.id);
 
+  const imgRef = ref(storage, user.profileImgUrl);
+  const url = await getDownloadURL(imgRef);
+
   //5 enviar la respuesta al cliente
   res.status(200).json({
     status: 'success',
@@ -73,7 +77,8 @@ exports.login = catchAsync(async (req, res, next) => {
       id: user.id,
       name: user.name,
       email: user.email,
-      profileImgUrl: user.profileImgUrl,
+      description: user.description,
+      profileImgUrl: url,
       role: user.role,
     },
   });
@@ -102,18 +107,35 @@ exports.updatedPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.renew = catchAsync(async (req, res, next) => {
-  const { sessionUser } = req;
+  const { id } = req.sessionUser;
 
-  const token = await generateJWT(sessionUser.id);
+  const user = await User.findOne({
+    where: {
+      id,
+    },
+  });
+
+  if (!user) {
+    return next(new AppError('User not found', 404));
+  }
+
+  const imgRef = ref(storage, user.profileImgUrl);
+  const urlPromise = getDownloadURL(imgRef);
+
+  const tokenPromise = generateJWT(user.id);
+
+  const [url, token] = await Promise.all([urlPromise, tokenPromise]);
 
   return res.status(200).json({
     status: 'success',
     token,
     user: {
-      id: sessionUser.id,
-      name: sessionUser.name,
-      email: sessionUser.email,
-      role: sessionUser.role,
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      description: user.description,
+      profileImgUrl: url,
+      role: user.role,
     },
   });
 });

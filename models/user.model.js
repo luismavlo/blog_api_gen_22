@@ -17,6 +17,10 @@ const User = db.define('users', {
     unique: true,
     allowNull: false,
   },
+  description: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
