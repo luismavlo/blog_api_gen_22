@@ -5,9 +5,11 @@ const hpp = require('hpp');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const xss = require('xss-clean');
-
+const socketio = require('socket.io');
 const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/error.controller');
+const http = require('http');
+const Sockets = require('./sockets');
 
 const authRouter = require('./routes/auth.routes');
 const commentRouter = require('./routes/comment.routes');
@@ -15,6 +17,8 @@ const postRouter = require('./routes/post.routes');
 const userRouter = require('./routes/user.routes');
 
 const app = express();
+// const server = http.createServer(app);
+
 const limiter = rateLimit({
   max: 100000,
   windowMs: 60 * 60 * 1000,
@@ -30,6 +34,12 @@ app.use(express.json());
 app.use(cors());
 app.use(xss());
 app.use(hpp());
+
+// const io = socketio(server, {
+//   /*configuraciones adicionales*/
+// });
+
+// new Sockets(io);
 
 app.use('/api/v1', limiter);
 
