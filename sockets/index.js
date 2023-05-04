@@ -6,7 +6,11 @@ class Sockets {
 
   socketEvents() {
     this.io.on('connection', (socket) => {
-      console.log('Cliente conectado');
+      console.log('cliente conectado');
+
+      socket.on('new-post', (post) => {
+        socket.broadcast.emit('render-new-post', post);
+      });
     });
   }
 }
